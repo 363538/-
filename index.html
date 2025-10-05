@@ -1,0 +1,2562 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>玩具积分商城</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+
+        :root {
+            --primary-color: #0078d7;
+            --primary-dark: #0066b4;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            --border-radius: 12px;
+            --box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0067c0, #00b294, #ff6b6b);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: hidden;
+            position: relative;
+            padding: 15px;
+            animation: gradientShift 10s ease infinite;
+            background-size: 200% 200%;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* 动态气泡背景 */
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.2);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            animation: float 20s infinite ease-in-out;
+        }
+
+        .bubble:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            top: 10%;
+            left: 20%;
+            animation-delay: 0s;
+        }
+
+        .bubble:nth-child(2) {
+            width: 120px;
+            height: 120px;
+            top: 60%;
+            left: 10%;
+            animation-delay: 4s;
+        }
+
+        .bubble:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            top: 20%;
+            right: 15%;
+            animation-delay: 8s;
+        }
+
+        .bubble:nth-child(4) {
+            width: 100px;
+            height: 100px;
+            top: 70%;
+            right: 20%;
+            animation-delay: 12s;
+        }
+
+        .bubble:nth-child(5) {
+            width: 50px;
+            height: 50px;
+            top: 40%;
+            left: 5%;
+            animation-delay: 16s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); }
+            25% { transform: translateY(-20px) translateX(10px); }
+            50% { transform: translateY(-10px) translateX(-10px); }
+            75% { transform: translateY(10px) translateX(15px); }
+        }
+
+        /* 容器样式 */
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            overflow: hidden;
+            z-index: 10;
+            margin: 15px;
+            transition: var(--transition);
+        }
+
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 头部样式 */
+        .header {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            padding: 20px;
+            text-align: center;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 5px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 10px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 消息提示样式 */
+        .message {
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin: 15px;
+            font-size: 0.95rem;
+            display: none;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        /* 表单样式 */
+        .form-container {
+            padding: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+            background: #fff;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.2);
+        }
+
+        .error-message {
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+        }
+
+        /* 按钮样式 */
+        .btn {
+            padding: 14px 24px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            box-shadow: 0 4px 6px rgba(0, 120, 215, 0.2);
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 120, 215, 0.3);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-success {
+            background: var(--success-color);
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-info {
+            background: var(--info-color);
+            color: white;
+        }
+
+        .btn-info:hover {
+            background: #138496;
+        }
+
+        .btn-block {
+            width: 100%;
+        }
+
+        /* 链接样式 */
+        .link-container {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 0.95rem;
+        }
+
+        .link {
+            color: var(--primary-color);
+            text-decoration: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .link:hover {
+            text-decoration: underline;
+            color: var(--primary-dark);
+        }
+
+        /* 页脚样式 */
+        .footer {
+            padding: 20px;
+            text-align: center;
+            font-size: 0.85rem;
+            color: #666;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+            background: rgba(0, 0, 0, 0.02);
+        }
+
+        /* 商城页面样式 */
+        .dashboard, .admin-dashboard {
+            display: none;
+        }
+
+        .dashboard .user-info, .admin-dashboard .user-info {
+            padding: 20px;
+            background: rgba(0, 120, 215, 0.08);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .dashboard .user-info h2, .admin-dashboard .user-info h2 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: var(--primary-color);
+        }
+
+        .points {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .dashboard-nav {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            background: var(--light-color);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .dashboard-nav-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .dashboard-nav-item:hover {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .dashboard-nav-item.active {
+            border-bottom-color: var(--primary-color);
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .dashboard-content {
+            padding: 20px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .dashboard-content.active {
+            display: block;
+        }
+
+        .products {
+            padding: 20px;
+        }
+
+        .search-box {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            min-width: 0;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0, 120, 215, 0.2);
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .product-card {
+            border: 1px solid #eaeaea;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            text-align: center;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        }
+
+        .product-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--box-shadow);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 140px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            transition: var(--transition);
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .product-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            color: #333;
+        }
+
+        .product-points {
+            color: var(--primary-color);
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        .add-to-cart-btn, .buy-btn {
+            flex: 1;
+            padding: 10px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .add-to-cart-btn {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .add-to-cart-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .buy-btn {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .buy-btn:hover {
+            background: #218838;
+        }
+
+        .cart-table, .purchase-history-table, .admin-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 0.95rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .cart-table th, .cart-table td,
+        .purchase-history-table th, .purchase-history-table td,
+        .admin-table th, .admin-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .cart-table th, .purchase-history-table th, .admin-table th {
+            background-color: var(--light-color);
+            font-weight: 600;
+            color: #333;
+        }
+
+        .cart-table tr:hover, .purchase-history-table tr:hover, .admin-table tr:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .cart-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .logout-btn {
+            display: block;
+            width: 120px;
+            margin: 20px auto;
+            background: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+
+        /* 管理员界面样式 */
+        .admin-tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            background: var(--light-color);
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .admin-tab {
+            padding: 15px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+            flex-shrink: 0;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .admin-tab:hover {
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .admin-tab.active {
+            border-bottom-color: var(--primary-color);
+            background: white;
+            color: var(--primary-color);
+        }
+
+        .admin-content {
+            padding: 20px;
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .admin-content.active {
+            display: block;
+        }
+
+        .admin-search-box {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .admin-search-box input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            min-width: 0;
+            font-size: 1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .edit-btn {
+            background: var(--info-color);
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background: #138496;
+        }
+
+        .delete-btn {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+        }
+
+        /* 模态框样式 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            width: 100%;
+            max-width: 500px;
+            box-shadow: var(--box-shadow);
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: scaleIn 0.3s ease;
+        }
+
+        @keyframes scaleIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #666;
+            transition: var(--transition);
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .close-modal:hover {
+            background: rgba(0, 0, 0, 0.05);
+            color: #333;
+        }
+
+        .modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .user-info {
+                justify-content: center;
+            }
+            
+            .product-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            }
+            
+            .product-actions {
+                flex-direction: column;
+            }
+            
+            .cart-actions {
+                flex-direction: column;
+            }
+            
+            .cart-actions .btn {
+                width: 100%;
+            }
+            
+            .search-box, .admin-search-box {
+                flex-direction: column;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .admin-table, .cart-table, .purchase-history-table {
+                display: block;
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+            
+            .modal-content {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .dashboard-nav-item, .admin-tab {
+                padding: 12px 15px;
+                font-size: 0.9rem;
+            }
+            
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-container {
+                padding: 20px;
+            }
+            
+            .dashboard-content, .admin-content {
+                padding: 15px;
+            }
+            
+            .points {
+                font-size: 1.5rem;
+            }
+        }
+
+        @media (min-width: 1200px) {
+            .container {
+                margin: 20px auto;
+            }
+        }
+
+        /* 实时更新通知 */
+        .update-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success-color);
+            color: white;
+            padding: 12px 18px;
+            border-radius: 8px;
+            box-shadow: var(--box-shadow);
+            z-index: 1000;
+            display: none;
+            animation: slideIn 0.5s ease;
+            max-width: 300px;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 空状态样式 */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state img {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        .empty-state h3 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .empty-state p {
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 动态气泡背景 -->
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+    <div class="bubble"></div>
+
+    <!-- 实时更新通知 -->
+    <div class="update-notification" id="update-notification"></div>
+
+    <!-- 登录容器 -->
+    <div class="container" id="login-container">
+        <div class="header">
+            <div>
+                <h1>玩具积分商城</h1>
+                <p>登录您的账户，开启玩具之旅</p>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <div class="message" id="login-message"></div>
+            
+            <div class="form-group">
+                <label for="username">用户名</label>
+                <input type="text" id="username" placeholder="请输入用户名" required>
+                <div class="error-message" id="username-error"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">密码</label>
+                <input type="password" id="password" placeholder="请输入密码" required>
+                <div class="error-message" id="password-error"></div>
+            </div>
+            
+            <button class="btn btn-block" id="login-btn">
+                <span class="loading" id="login-loading" style="display: none;"></span>
+                登录
+            </button>
+            
+            <div class="link-container">
+                还没有账户？<span class="link" id="show-register">立即注册</span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            © 诚制作|诚的资源|诚的工作室|玩具积分商城
+        </div>
+    </div>
+
+    <!-- 注册容器 -->
+    <div class="container" id="register-container" style="display: none;">
+        <div class="header">
+            <div>
+                <h1>玩具积分商城</h1>
+                <p>创建新账户，开启玩具之旅</p>
+            </div>
+        </div>
+        
+        <div class="form-container">
+            <div class="message" id="register-message"></div>
+            
+            <div class="form-group">
+                <label for="reg-username">用户名</label>
+                <input type="text" id="reg-username" placeholder="请输入用户名（至少3个字符）" required>
+                <div class="error-message" id="reg-username-error"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="reg-password">密码</label>
+                <input type="password" id="reg-password" placeholder="请输入密码（至少6个字符）" required>
+                <div class="error-message" id="reg-password-error"></div>
+            </div>
+            
+            <div class="form-group">
+                <label for="reg-confirm-password">确认密码</label>
+                <input type="password" id="reg-confirm-password" placeholder="请再次输入密码" required>
+                <div class="error-message" id="reg-confirm-password-error"></div>
+            </div>
+            
+            <button class="btn btn-block" id="register-btn">
+                <span class="loading" id="register-loading" style="display: none;"></span>
+                注册
+            </button>
+            
+            <div class="link-container">
+                已有账户？<span class="link" id="show-login">立即登录</span>
+            </div>
+        </div>
+        
+        <div class="footer">
+            © 诚制作|诚的资源|诚的工作室|玩具积分商城
+        </div>
+    </div>
+
+    <!-- 商城页面 -->
+    <div class="container dashboard" id="dashboard">
+        <div class="header">
+            <div>
+                <h1>玩具积分商城</h1>
+                <p>欢迎来到玩具世界</p>
+            </div>
+            <div class="user-info">
+                <span>欢迎, <span id="dashboard-username"></span></span>
+                <button class="btn logout-btn" id="logout-btn">退出登录</button>
+            </div>
+        </div>
+        
+        <div class="user-info">
+            <div>
+                <h2>用户信息</h2>
+                <p>当前积分: <span class="points" id="dashboard-points">100</span> 分</p>
+            </div>
+        </div>
+        
+        <div class="message" id="dashboard-message"></div>
+        
+        <div class="dashboard-nav">
+            <div class="dashboard-nav-item active" data-tab="products">商品浏览</div>
+            <div class="dashboard-nav-item" data-tab="cart">购物车</div>
+            <div class="dashboard-nav-item" data-tab="purchase-history">购买记录</div>
+        </div>
+        
+        <!-- 商品浏览 -->
+        <div class="dashboard-content active" id="products-content">
+            <div class="search-box">
+                <input type="text" id="product-search" placeholder="搜索商品名称...">
+                <button class="btn" id="search-products-btn">搜索</button>
+                <button class="btn btn-secondary" id="reset-search-btn">重置</button>
+            </div>
+            
+            <div class="product-grid" id="product-grid">
+                <!-- 商品将通过JavaScript动态加载 -->
+            </div>
+        </div>
+        
+        <!-- 购物车 -->
+        <div class="dashboard-content" id="cart-content">
+            <h2>购物车</h2>
+            <table class="cart-table">
+                <thead>
+                    <tr>
+                        <th>商品名称</th>
+                        <th>数量</th>
+                        <th>所需积分</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="cart-table-body">
+                    <!-- 购物车商品将通过JavaScript动态加载 -->
+                </tbody>
+            </table>
+            <div class="cart-actions">
+                <button class="btn btn-success" id="checkout-btn">结算购物车</button>
+                <button class="btn btn-danger" id="clear-cart-btn">清空购物车</button>
+            </div>
+        </div>
+        
+        <!-- 购买记录 -->
+        <div class="dashboard-content" id="purchase-history-content">
+            <h2>购买记录</h2>
+            <table class="purchase-history-table">
+                <thead>
+                    <tr>
+                        <th>商品名称</th>
+                        <th>所需积分</th>
+                        <th>购买时间</th>
+                    </tr>
+                </thead>
+                <tbody id="purchase-history-table-body">
+                    <!-- 购买记录将通过JavaScript动态加载 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="footer">
+            © 诚制作|诚的资源|诚的工作室|玩具积分商城
+        </div>
+    </div>
+
+    <!-- 管理员页面 -->
+    <div class="container admin-dashboard" id="admin-dashboard">
+        <div class="header">
+            <div>
+                <h1>玩具积分商城 - 管理员面板</h1>
+                <p>系统管理</p>
+            </div>
+            <div class="user-info">
+                <span>管理员: <span id="admin-username"></span></span>
+                <button class="btn logout-btn" id="admin-logout-btn">退出登录</button>
+            </div>
+        </div>
+        
+        <div class="message" id="admin-message"></div>
+        
+        <div class="admin-tabs">
+            <div class="admin-tab active" data-tab="users">用户管理</div>
+            <div class="admin-tab" data-tab="products">商品管理</div>
+            <div class="admin-tab" data-tab="stats">数据统计</div>
+        </div>
+        
+        <div class="admin-content active" id="users-content">
+            <h2>用户管理</h2>
+            <div class="admin-search-box">
+                <input type="text" id="user-search" placeholder="搜索用户名...">
+                <button class="btn" id="search-users-btn">搜索</button>
+                <button class="btn btn-secondary" id="reset-user-search-btn">重置</button>
+            </div>
+            <button class="btn btn-success" id="add-user-btn">添加用户</button>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>用户名</th>
+                        <th>积分</th>
+                        <th>注册时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <!-- 用户数据将通过JavaScript动态加载 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="admin-content" id="products-content">
+            <h2>商品管理</h2>
+            <div class="admin-search-box">
+                <input type="text" id="admin-product-search" placeholder="搜索商品名称...">
+                <button class="btn" id="search-admin-products-btn">搜索</button>
+                <button class="btn btn-secondary" id="reset-admin-product-search-btn">重置</button>
+            </div>
+            <button class="btn btn-success" id="add-product-btn">添加商品</button>
+            <table class="admin-table">
+                <thead>
+                    <tr>
+                        <th>商品名称</th>
+                        <th>所需积分</th>
+                        <th>创建时间</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="products-table-body">
+                    <!-- 商品数据将通过JavaScript动态加载 -->
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="admin-content" id="stats-content">
+            <h2>数据统计</h2>
+            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+                <div class="stat-card" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
+                    <h3 style="color: var(--primary-color); font-size: 2.5rem; margin-bottom: 10px;" id="total-users">0</h3>
+                    <p style="color: #666;">总用户数</p>
+                </div>
+                <div class="stat-card" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
+                    <h3 style="color: var(--success-color); font-size: 2.5rem; margin-bottom: 10px;" id="total-products">0</h3>
+                    <p style="color: #666;">总商品数</p>
+                </div>
+                <div class="stat-card" style="background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
+                    <h3 style="color: var(--info-color); font-size: 2.5rem; margin-bottom: 10px;" id="total-purchases">0</h3>
+                    <p style="color: #666;">总交易数</p>
+                </div>
+            </div>
+            <button class="btn btn-info" id="export-data-btn">导出数据</button>
+            <button class="btn btn-warning" id="import-data-btn">导入数据</button>
+            <button class="btn btn-danger" id="reset-data-btn">重置数据</button>
+        </div>
+        
+        <div class="footer">
+            © 诚制作|诚的资源|诚的工作室|玩具积分商城
+        </div>
+    </div>
+
+    <!-- 用户编辑模态框 -->
+    <div class="modal" id="user-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="user-modal-title">编辑用户</div>
+                <button class="close-modal" id="close-user-modal">&times;</button>
+            </div>
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="edit-username">用户名</label>
+                    <input type="text" id="edit-username" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-password">密码 (留空则不修改)</label>
+                    <input type="password" id="edit-password" placeholder="输入新密码">
+                </div>
+                <div class="form-group">
+                    <label for="edit-points">积分</label>
+                    <input type="number" id="edit-points" required min="0">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="cancel-user-edit">取消</button>
+                    <button class="btn btn-success" id="save-user">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 商品编辑模态框 -->
+    <div class="modal" id="product-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="product-modal-title">编辑商品</div>
+                <button class="close-modal" id="close-product-modal">&times;</button>
+            </div>
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="edit-product-name">商品名称</label>
+                    <input type="text" id="edit-product-name" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-product-points">所需积分</label>
+                    <input type="number" id="edit-product-points" required min="1">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="cancel-product-edit">取消</button>
+                    <button class="btn btn-success" id="save-product">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 数据导入模态框 -->
+    <div class="modal" id="import-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">导入数据</div>
+                <button class="close-modal" id="close-import-modal">&times;</button>
+            </div>
+            <div class="form-container">
+                <div class="form-group">
+                    <label for="import-file">选择数据文件</label>
+                    <input type="file" id="import-file" accept=".json">
+                    <p style="font-size: 0.9rem; color: #666; margin-top: 8px;">请选择之前导出的JSON数据文件</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" id="cancel-import">取消</button>
+                    <button class="btn btn-success" id="confirm-import">导入</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 初始化数据存储
+        function initializeData() {
+            if (!localStorage.getItem('users')) {
+                const defaultUsers = {
+                    'zhangzhicheng': {
+                        password: '363538',
+                        points: 1000,
+                        isAdmin: true,
+                        registerTime: new Date().toISOString()
+                    }
+                };
+                localStorage.setItem('users', JSON.stringify(defaultUsers));
+            } else {
+                // 修复：确保管理员账户权限正确
+                const existingUsers = JSON.parse(localStorage.getItem('users'));
+                if (existingUsers['zhangzhicheng']) {
+                    existingUsers['zhangzhicheng'].isAdmin = true;
+                    localStorage.setItem('users', JSON.stringify(existingUsers));
+                }
+            }
+            
+            if (!localStorage.getItem('products')) {
+                const defaultProducts = [
+                    { id: 1, name: '乐高积木套装', points: 50, createTime: new Date().toISOString() },
+                    { id: 2, name: '遥控汽车', points: 80, createTime: new Date().toISOString() },
+                    { id: 3, name: '拼图游戏', points: 30, createTime: new Date().toISOString() },
+                    { id: 4, name: '毛绒玩具熊', points: 60, createTime: new Date().toISOString() },
+                    { id: 5, name: '变形金刚', points: 70, createTime: new Date().toISOString() },
+                    { id: 6, name: '积木火车', points: 90, createTime: new Date().toISOString() }
+                ];
+                localStorage.setItem('products', JSON.stringify(defaultProducts));
+            }
+            
+            if (!localStorage.getItem('nextProductId')) {
+                localStorage.setItem('nextProductId', '7');
+            }
+            
+            if (!localStorage.getItem('currentUser')) {
+                localStorage.setItem('currentUser', '');
+            }
+            
+            if (!localStorage.getItem('carts')) {
+                localStorage.setItem('carts', JSON.stringify({}));
+            }
+            
+            if (!localStorage.getItem('purchases')) {
+                localStorage.setItem('purchases', JSON.stringify({}));
+            }
+        }
+
+        // DOM元素
+        const loginContainer = document.getElementById('login-container');
+        const registerContainer = document.getElementById('register-container');
+        const dashboard = document.getElementById('dashboard');
+        const adminDashboard = document.getElementById('admin-dashboard');
+        const showRegisterLink = document.getElementById('show-register');
+        const showLoginLink = document.getElementById('show-login');
+        const loginBtn = document.getElementById('login-btn');
+        const registerBtn = document.getElementById('register-btn');
+        const logoutBtn = document.getElementById('logout-btn');
+        const adminLogoutBtn = document.getElementById('admin-logout-btn');
+        const productGrid = document.getElementById('product-grid');
+        const usersTableBody = document.getElementById('users-table-body');
+        const productsTableBody = document.getElementById('products-table-body');
+        const cartTableBody = document.getElementById('cart-table-body');
+        const purchaseHistoryTableBody = document.getElementById('purchase-history-table-body');
+        const adminTabs = document.querySelectorAll('.admin-tab');
+        const adminContents = document.querySelectorAll('.admin-content');
+        const dashboardNavItems = document.querySelectorAll('.dashboard-nav-item');
+        const dashboardContents = document.querySelectorAll('.dashboard-content');
+        const addUserBtn = document.getElementById('add-user-btn');
+        const addProductBtn = document.getElementById('add-product-btn');
+        const userModal = document.getElementById('user-modal');
+        const productModal = document.getElementById('product-modal');
+        const importModal = document.getElementById('import-modal');
+        const closeUserModal = document.getElementById('close-user-modal');
+        const closeProductModal = document.getElementById('close-product-modal');
+        const closeImportModal = document.getElementById('close-import-modal');
+        const cancelUserEdit = document.getElementById('cancel-user-edit');
+        const cancelProductEdit = document.getElementById('cancel-product-edit');
+        const cancelImport = document.getElementById('cancel-import');
+        const saveUserBtn = document.getElementById('save-user');
+        const saveProductBtn = document.getElementById('save-product');
+        const checkoutBtn = document.getElementById('checkout-btn');
+        const clearCartBtn = document.getElementById('clear-cart-btn');
+        const productSearch = document.getElementById('product-search');
+        const searchProductsBtn = document.getElementById('search-products-btn');
+        const resetSearchBtn = document.getElementById('reset-search-btn');
+        const userSearch = document.getElementById('user-search');
+        const searchUsersBtn = document.getElementById('search-users-btn');
+        const resetUserSearchBtn = document.getElementById('reset-user-search-btn');
+        const adminProductSearch = document.getElementById('admin-product-search');
+        const searchAdminProductsBtn = document.getElementById('search-admin-products-btn');
+        const resetAdminProductSearchBtn = document.getElementById('reset-admin-product-search-btn');
+        const updateNotification = document.getElementById('update-notification');
+        const exportDataBtn = document.getElementById('export-data-btn');
+        const importDataBtn = document.getElementById('import-data-btn');
+        const resetDataBtn = document.getElementById('reset-data-btn');
+        const confirmImportBtn = document.getElementById('confirm-import');
+        const importFile = document.getElementById('import-file');
+        
+        // 消息元素
+        const loginMessage = document.getElementById('login-message');
+        const registerMessage = document.getElementById('register-message');
+        const dashboardMessage = document.getElementById('dashboard-message');
+        const adminMessage = document.getElementById('admin-message');
+
+        // 初始化
+        initializeData();
+
+        // 实时更新通知
+        function showUpdateNotification(message, type = 'success') {
+            updateNotification.textContent = message;
+            updateNotification.className = `update-notification ${type === 'success' ? 'success' : type === 'error' ? 'error' : 'info'}`;
+            updateNotification.style.display = 'block';
+            setTimeout(() => {
+                updateNotification.style.display = 'none';
+            }, 3000);
+        }
+
+        // 数据更新触发器
+        function triggerDataUpdate(type, data) {
+            // 存储更新信息
+            const updateInfo = {
+                type: type,
+                data: data,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('lastUpdate', JSON.stringify(updateInfo));
+            
+            // 触发storage事件
+            window.dispatchEvent(new Event('storage'));
+        }
+
+        // 监听storage事件以实现实时更新
+        window.addEventListener('storage', function(e) {
+            // 检查是否有数据更新
+            if (e.key === 'lastUpdate') {
+                const updateInfo = JSON.parse(e.newValue);
+                if (updateInfo) {
+                    // 根据更新类型刷新相应的数据
+                    switch(updateInfo.type) {
+                        case 'users':
+                            if (adminDashboard.style.display === 'block') {
+                                loadUsersTable();
+                                loadStats();
+                                showUpdateNotification('用户数据已更新');
+                            }
+                            break;
+                        case 'products':
+                            loadProductsTable();
+                            loadProductsGrid();
+                            loadStats();
+                            showUpdateNotification('商品数据已更新');
+                            break;
+                        case 'carts':
+                            if (dashboard.style.display === 'block') {
+                                loadCart();
+                                showUpdateNotification('购物车已更新');
+                            }
+                            break;
+                        case 'purchases':
+                            if (dashboard.style.display === 'block') {
+                                loadPurchaseHistory();
+                                loadStats();
+                                showUpdateNotification('购买记录已更新');
+                            }
+                            break;
+                    }
+                }
+            }
+            
+            // 检查用户数据是否更新
+            if (e.key === 'users') {
+                const currentUser = localStorage.getItem('currentUser');
+                if (currentUser && dashboard.style.display === 'block') {
+                    const users = JSON.parse(localStorage.getItem('users'));
+                    if (users[currentUser]) {
+                        document.getElementById('dashboard-points').textContent = users[currentUser].points;
+                    }
+                }
+            }
+        });
+
+        // 显示注册表单
+        showRegisterLink.addEventListener('click', function() {
+            loginContainer.style.display = 'none';
+            registerContainer.style.display = 'block';
+            clearMessages();
+            clearErrors();
+        });
+
+        // 显示登录表单
+        showLoginLink.addEventListener('click', function() {
+            registerContainer.style.display = 'none';
+            loginContainer.style.display = 'block';
+            clearMessages();
+            clearErrors();
+        });
+
+        // 登录功能
+        loginBtn.addEventListener('click', function() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            
+            // 显示加载动画
+            document.getElementById('login-loading').style.display = 'inline-block';
+            loginBtn.disabled = true;
+            
+            // 模拟网络延迟
+            setTimeout(() => {
+                if (validateLoginForm(username, password)) {
+                    const users = JSON.parse(localStorage.getItem('users'));
+                    
+                    if (users[username] && users[username].password === password) {
+                        // 登录成功
+                        localStorage.setItem('currentUser', username);
+                        
+                        // 修复：严格检查管理员权限
+                        if (users[username].isAdmin === true) {
+                            showAdminDashboard(username);
+                        } else {
+                            showDashboard(username, users[username].points);
+                        }
+                    } else {
+                        showError('password-error', '用户名或密码错误');
+                    }
+                }
+                
+                // 隐藏加载动画
+                document.getElementById('login-loading').style.display = 'none';
+                loginBtn.disabled = false;
+            }, 800);
+        });
+
+        // 注册功能
+        registerBtn.addEventListener('click', function() {
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm-password').value;
+            
+            // 显示加载动画
+            document.getElementById('register-loading').style.display = 'inline-block';
+            registerBtn.disabled = true;
+            
+            // 模拟网络延迟
+            setTimeout(() => {
+                if (validateRegisterForm(username, password, confirmPassword)) {
+                    const users = JSON.parse(localStorage.getItem('users'));
+                    
+                    if (users[username]) {
+                        showError('reg-username-error', '用户名已存在');
+                    } else {
+                        // 注册成功
+                        users[username] = {
+                            password: password,
+                            points: 100, // 新用户赠送100积分
+                            isAdmin: false,
+                            registerTime: new Date().toISOString()
+                        };
+                        
+                        localStorage.setItem('users', JSON.stringify(users));
+                        localStorage.setItem('currentUser', username);
+                        
+                        // 触发数据更新
+                        triggerDataUpdate('users', { action: 'register', username: username });
+                        
+                        showMessage(registerMessage, '注册成功！您已获得100积分奖励。', 'success');
+                        setTimeout(() => {
+                            showDashboard(username, 100);
+                        }, 1500);
+                    }
+                }
+                
+                // 隐藏加载动画
+                document.getElementById('register-loading').style.display = 'none';
+                registerBtn.disabled = false;
+            }, 800);
+        });
+
+        // 退出登录
+        logoutBtn.addEventListener('click', function() {
+            localStorage.setItem('currentUser', '');
+            dashboard.style.display = 'none';
+            loginContainer.style.display = 'block';
+            clearFormFields();
+        });
+
+        adminLogoutBtn.addEventListener('click', function() {
+            localStorage.setItem('currentUser', '');
+            adminDashboard.style.display = 'none';
+            loginContainer.style.display = 'block';
+            clearFormFields();
+        });
+
+        // 管理员标签切换
+        adminTabs.forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                
+                // 更新标签状态
+                adminTabs.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 更新内容显示
+                adminContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === `${tabId}-content`) {
+                        content.classList.add('active');
+                        
+                        // 如果切换到统计页面，加载统计数据
+                        if (tabId === 'stats') {
+                            loadStats();
+                        }
+                    }
+                });
+            });
+        });
+
+        // 用户商城标签切换
+        dashboardNavItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const tabId = this.getAttribute('data-tab');
+                
+                // 更新标签状态
+                dashboardNavItems.forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                // 更新内容显示
+                dashboardContents.forEach(content => {
+                    content.classList.remove('active');
+                    if (content.id === `${tabId}-content`) {
+                        content.classList.add('active');
+                        
+                        // 如果切换到购物车或购买记录，加载相应数据
+                        if (tabId === 'cart') {
+                            loadCart();
+                        } else if (tabId === 'purchase-history') {
+                            loadPurchaseHistory();
+                        }
+                    }
+                });
+            });
+        });
+
+        // 添加用户按钮
+        addUserBtn.addEventListener('click', function() {
+            document.getElementById('user-modal-title').textContent = '添加用户';
+            document.getElementById('edit-username').value = '';
+            document.getElementById('edit-password').value = '';
+            document.getElementById('edit-points').value = '100';
+            document.getElementById('edit-username').removeAttribute('readonly');
+            userModal.style.display = 'flex';
+        });
+
+        // 添加商品按钮
+        addProductBtn.addEventListener('click', function() {
+            document.getElementById('product-modal-title').textContent = '添加商品';
+            document.getElementById('edit-product-name').value = '';
+            document.getElementById('edit-product-points').value = '10';
+            productModal.style.display = 'flex';
+        });
+
+        // 关闭模态框
+        closeUserModal.addEventListener('click', function() {
+            userModal.style.display = 'none';
+        });
+
+        closeProductModal.addEventListener('click', function() {
+            productModal.style.display = 'none';
+        });
+
+        closeImportModal.addEventListener('click', function() {
+            importModal.style.display = 'none';
+        });
+
+        cancelUserEdit.addEventListener('click', function() {
+            userModal.style.display = 'none';
+        });
+
+        cancelProductEdit.addEventListener('click', function() {
+            productModal.style.display = 'none';
+        });
+
+        cancelImport.addEventListener('click', function() {
+            importModal.style.display = 'none';
+        });
+
+        // 保存用户
+        saveUserBtn.addEventListener('click', function() {
+            const username = document.getElementById('edit-username').value;
+            const password = document.getElementById('edit-password').value;
+            const points = parseInt(document.getElementById('edit-points').value);
+            const users = JSON.parse(localStorage.getItem('users'));
+            const isAdding = document.getElementById('user-modal-title').textContent === '添加用户';
+            
+            if (!username) {
+                alert('请输入用户名');
+                return;
+            }
+            
+            if (isAdding) {
+                if (users[username]) {
+                    alert('用户名已存在');
+                    return;
+                }
+                
+                if (!password) {
+                    alert('请设置密码');
+                    return;
+                }
+                
+                users[username] = {
+                    password: password,
+                    points: points,
+                    isAdmin: false,
+                    registerTime: new Date().toISOString()
+                };
+                
+                showMessage(adminMessage, `用户 ${username} 添加成功`, 'success');
+                
+                // 触发数据更新
+                triggerDataUpdate('users', { action: 'add', username: username });
+            } else {
+                const originalUsername = saveUserBtn.getAttribute('data-original-username');
+                
+                if (originalUsername !== username && users[username]) {
+                    alert('用户名已存在');
+                    return;
+                }
+                
+                // 更新用户数据
+                if (originalUsername !== username) {
+                    users[username] = users[originalUsername];
+                    delete users[originalUsername];
+                    
+                    // 更新购物车和购买记录中的用户名
+                    updateUserReferences(originalUsername, username);
+                }
+                
+                if (password) {
+                    users[username].password = password;
+                }
+                
+                users[username].points = points;
+                
+                showMessage(adminMessage, `用户 ${username} 更新成功`, 'success');
+                
+                // 触发数据更新
+                triggerDataUpdate('users', { action: 'update', username: username });
+            }
+            
+            localStorage.setItem('users', JSON.stringify(users));
+            userModal.style.display = 'none';
+            loadUsersTable();
+        });
+
+        // 保存商品
+        saveProductBtn.addEventListener('click', function() {
+            const name = document.getElementById('edit-product-name').value;
+            const points = parseInt(document.getElementById('edit-product-points').value);
+            const products = JSON.parse(localStorage.getItem('products'));
+            const isAdding = document.getElementById('product-modal-title').textContent === '添加商品';
+            
+            if (!name) {
+                alert('请输入商品名称');
+                return;
+            }
+            
+            if (points < 1) {
+                alert('积分必须大于0');
+                return;
+            }
+            
+            if (isAdding) {
+                const nextId = parseInt(localStorage.getItem('nextProductId'));
+                products.push({
+                    id: nextId,
+                    name: name,
+                    points: points,
+                    createTime: new Date().toISOString()
+                });
+                localStorage.setItem('nextProductId', (nextId + 1).toString());
+                showMessage(adminMessage, `商品 ${name} 添加成功`, 'success');
+                
+                // 触发数据更新
+                triggerDataUpdate('products', { action: 'add', productName: name });
+            } else {
+                const productId = parseInt(saveProductBtn.getAttribute('data-product-id'));
+                const productIndex = products.findIndex(p => p.id === productId);
+                
+                if (productIndex !== -1) {
+                    products[productIndex].name = name;
+                    products[productIndex].points = points;
+                    showMessage(adminMessage, `商品 ${name} 更新成功`, 'success');
+                    
+                    // 触发数据更新
+                    triggerDataUpdate('products', { action: 'update', productName: name });
+                }
+            }
+            
+            localStorage.setItem('products', JSON.stringify(products));
+            productModal.style.display = 'none';
+            loadProductsTable();
+            loadProductsGrid();
+        });
+
+        // 结算购物车
+        checkoutBtn.addEventListener('click', function() {
+            const currentUser = localStorage.getItem('currentUser');
+            const carts = JSON.parse(localStorage.getItem('carts'));
+            const users = JSON.parse(localStorage.getItem('users'));
+            const products = JSON.parse(localStorage.getItem('products'));
+            const purchases = JSON.parse(localStorage.getItem('purchases'));
+            
+            if (!carts[currentUser] || carts[currentUser].length === 0) {
+                showMessage(dashboardMessage, '购物车为空，无法结算', 'error');
+                return;
+            }
+            
+            // 计算总积分
+            let totalPoints = 0;
+            const cartItems = [];
+            
+            carts[currentUser].forEach(itemId => {
+                const product = products.find(p => p.id === itemId);
+                if (product) {
+                    totalPoints += product.points;
+                    cartItems.push({
+                        id: product.id,
+                        name: product.name,
+                        points: product.points
+                    });
+                }
+            });
+            
+            // 检查积分是否足够
+            if (users[currentUser].points < totalPoints) {
+                showMessage(dashboardMessage, `积分不足，需要 ${totalPoints} 积分，当前只有 ${users[currentUser].points} 积分`, 'error');
+                return;
+            }
+            
+            // 扣除积分
+            users[currentUser].points -= totalPoints;
+            
+            // 记录购买记录
+            if (!purchases[currentUser]) {
+                purchases[currentUser] = [];
+            }
+            
+            purchases[currentUser].push({
+                id: Date.now(),
+                items: cartItems,
+                totalPoints: totalPoints,
+                date: new Date().toLocaleString()
+            });
+            
+            // 清空购物车
+            carts[currentUser] = [];
+            
+            // 保存数据
+            localStorage.setItem('users', JSON.stringify(users));
+            localStorage.setItem('carts', JSON.stringify(carts));
+            localStorage.setItem('purchases', JSON.stringify(purchases));
+            
+            // 触发数据更新
+            triggerDataUpdate('users', { action: 'purchase', username: currentUser, points: totalPoints });
+            triggerDataUpdate('carts', { action: 'checkout', username: currentUser });
+            triggerDataUpdate('purchases', { action: 'add', username: currentUser });
+            
+            // 更新显示
+            document.getElementById('dashboard-points').textContent = users[currentUser].points;
+            showMessage(dashboardMessage, `购买成功！消耗 ${totalPoints} 积分。`, 'success');
+            
+            // 重新加载购物车
+            loadCart();
+            
+            // 切换到购买记录
+            document.querySelector('.dashboard-nav-item[data-tab="purchase-history"]').click();
+        });
+
+        // 清空购物车
+        clearCartBtn.addEventListener('click', function() {
+            const currentUser = localStorage.getItem('currentUser');
+            const carts = JSON.parse(localStorage.getItem('carts'));
+            
+            if (!carts[currentUser] || carts[currentUser].length === 0) {
+                showMessage(dashboardMessage, '购物车已为空', 'error');
+                return;
+            }
+            
+            if (confirm('确定要清空购物车吗？')) {
+                carts[currentUser] = [];
+                localStorage.setItem('carts', JSON.stringify(carts));
+                
+                // 触发数据更新
+                triggerDataUpdate('carts', { action: 'clear', username: currentUser });
+                
+                showMessage(dashboardMessage, '购物车已清空', 'success');
+                loadCart();
+            }
+        });
+
+        // 商品搜索
+        searchProductsBtn.addEventListener('click', function() {
+            loadProductsGrid(productSearch.value);
+        });
+
+        productSearch.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadProductsGrid(productSearch.value);
+            }
+        });
+
+        resetSearchBtn.addEventListener('click', function() {
+            productSearch.value = '';
+            loadProductsGrid();
+        });
+
+        // 用户搜索
+        searchUsersBtn.addEventListener('click', function() {
+            loadUsersTable(userSearch.value);
+        });
+
+        userSearch.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadUsersTable(userSearch.value);
+            }
+        });
+
+        resetUserSearchBtn.addEventListener('click', function() {
+            userSearch.value = '';
+            loadUsersTable();
+        });
+
+        // 管理员商品搜索
+        searchAdminProductsBtn.addEventListener('click', function() {
+            loadProductsTable(adminProductSearch.value);
+        });
+
+        adminProductSearch.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadProductsTable(adminProductSearch.value);
+            }
+        });
+
+        resetAdminProductSearchBtn.addEventListener('click', function() {
+            adminProductSearch.value = '';
+            loadProductsTable();
+        });
+
+        // 导出数据
+        exportDataBtn.addEventListener('click', function() {
+            const data = {
+                users: JSON.parse(localStorage.getItem('users')),
+                products: JSON.parse(localStorage.getItem('products')),
+                carts: JSON.parse(localStorage.getItem('carts')),
+                purchases: JSON.parse(localStorage.getItem('purchases')),
+                exportTime: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const dataStr = JSON.stringify(data, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `toy-store-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showMessage(adminMessage, '数据导出成功', 'success');
+        });
+
+        // 导入数据
+        importDataBtn.addEventListener('click', function() {
+            importModal.style.display = 'flex';
+        });
+
+        confirmImportBtn.addEventListener('click', function() {
+            const file = importFile.files[0];
+            if (!file) {
+                alert('请选择要导入的文件');
+                return;
+            }
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    if (confirm('导入数据将覆盖当前所有数据，确定继续吗？')) {
+                        if (data.users) localStorage.setItem('users', JSON.stringify(data.users));
+                        if (data.products) localStorage.setItem('products', JSON.stringify(data.products));
+                        if (data.carts) localStorage.setItem('carts', JSON.stringify(data.carts));
+                        if (data.purchases) localStorage.setItem('purchases', JSON.stringify(data.purchases));
+                        
+                        // 触发数据更新
+                        triggerDataUpdate('users', { action: 'import' });
+                        triggerDataUpdate('products', { action: 'import' });
+                        
+                        showMessage(adminMessage, '数据导入成功', 'success');
+                        importModal.style.display = 'none';
+                        
+                        // 重新加载所有数据
+                        loadUsersTable();
+                        loadProductsTable();
+                        loadStats();
+                    }
+                } catch (error) {
+                    alert('文件格式错误，无法导入数据！');
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        // 重置数据
+        resetDataBtn.addEventListener('click', function() {
+            if (confirm('确定要重置所有数据吗？这将删除所有用户、商品和购买记录，只保留默认数据。')) {
+                localStorage.clear();
+                initializeData();
+                
+                // 触发数据更新
+                triggerDataUpdate('users', { action: 'reset' });
+                triggerDataUpdate('products', { action: 'reset' });
+                
+                showMessage(adminMessage, '数据重置成功', 'success');
+                
+                // 重新加载所有数据
+                loadUsersTable();
+                loadProductsTable();
+                loadStats();
+            }
+        });
+
+        // 显示商城页面
+        function showDashboard(username, points) {
+            loginContainer.style.display = 'none';
+            registerContainer.style.display = 'none';
+            dashboard.style.display = 'block';
+            
+            document.getElementById('dashboard-username').textContent = username;
+            document.getElementById('dashboard-points').textContent = points;
+            
+            loadProductsGrid();
+        }
+
+        // 显示管理员页面
+        function showAdminDashboard(username) {
+            loginContainer.style.display = 'none';
+            registerContainer.style.display = 'none';
+            adminDashboard.style.display = 'block';
+            
+            document.getElementById('admin-username').textContent = username;
+            
+            loadUsersTable();
+            loadProductsTable();
+            loadStats();
+        }
+
+        // 加载商品网格
+        function loadProductsGrid(searchTerm = '') {
+            const products = JSON.parse(localStorage.getItem('products'));
+            const currentUser = localStorage.getItem('currentUser');
+            const users = JSON.parse(localStorage.getItem('users'));
+            const userPoints = users[currentUser] ? users[currentUser].points : 0;
+            
+            // 过滤商品
+            let filteredProducts = products;
+            if (searchTerm) {
+                filteredProducts = products.filter(product => 
+                    product.name.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+            }
+            
+            productGrid.innerHTML = '';
+            
+            if (filteredProducts.length === 0) {
+                productGrid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1 / -1;">
+                        <h3>未找到匹配的商品</h3>
+                        <p>尝试调整搜索条件或浏览所有商品</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            filteredProducts.forEach(product => {
+                const productCard = document.createElement('div');
+                productCard.className = 'product-card';
+                
+                productCard.innerHTML = `
+                    <div class="product-image">${product.name}图片</div>
+                    <div class="product-name">${product.name}</div>
+                    <div class="product-points">${product.points} 积分</div>
+                    <div class="product-actions">
+                        <button class="add-to-cart-btn" data-product-id="${product.id}">加入购物车</button>
+                        <button class="buy-btn" data-product-id="${product.id}" data-product-name="${product.name}" data-points="${product.points}">直接购买</button>
+                    </div>
+                `;
+                
+                productGrid.appendChild(productCard);
+            });
+            
+            // 添加加入购物车事件
+            const addToCartButtons = document.querySelectorAll('.add-to-cart-btn');
+            addToCartButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = parseInt(this.getAttribute('data-product-id'));
+                    addToCart(productId);
+                });
+            });
+            
+            // 添加直接购买事件
+            const buyButtons = document.querySelectorAll('.buy-btn');
+            buyButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = parseInt(this.getAttribute('data-product-id'));
+                    const productName = this.getAttribute('data-product-name');
+                    const points = parseInt(this.getAttribute('data-points'));
+                    
+                    if (userPoints >= points) {
+                        // 更新用户积分
+                        users[currentUser].points = userPoints - points;
+                        localStorage.setItem('users', JSON.stringify(users));
+                        
+                        // 记录购买记录
+                        const purchases = JSON.parse(localStorage.getItem('purchases'));
+                        if (!purchases[currentUser]) {
+                            purchases[currentUser] = [];
+                        }
+                        
+                        purchases[currentUser].push({
+                            id: Date.now(),
+                            items: [{
+                                id: productId,
+                                name: productName,
+                                points: points
+                            }],
+                            totalPoints: points,
+                            date: new Date().toLocaleString()
+                        });
+                        
+                        localStorage.setItem('purchases', JSON.stringify(purchases));
+                        
+                        // 触发数据更新
+                        triggerDataUpdate('users', { action: 'purchase', username: currentUser, points: points });
+                        triggerDataUpdate('purchases', { action: 'add', username: currentUser });
+                        
+                        // 更新显示
+                        document.getElementById('dashboard-points').textContent = users[currentUser].points;
+                        showMessage(dashboardMessage, `成功购买 ${productName}！消耗 ${points} 积分。`, 'success');
+                        
+                        // 重新加载商品网格以更新按钮状态
+                        loadProductsGrid();
+                    } else {
+                        showMessage(dashboardMessage, '积分不足，无法购买此商品！', 'error');
+                    }
+                });
+            });
+        }
+
+        // 加载用户表格
+        function loadUsersTable(searchTerm = '') {
+            const users = JSON.parse(localStorage.getItem('users'));
+            const currentUser = localStorage.getItem('currentUser');
+            
+            usersTableBody.innerHTML = '';
+            
+            let userCount = 0;
+            Object.keys(users).forEach(username => {
+                // 不显示当前登录的管理员
+                if (username === currentUser) return;
+                
+                // 搜索过滤
+                if (searchTerm && !username.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    return;
+                }
+                
+                const userRow = document.createElement('tr');
+                
+                userRow.innerHTML = `
+                    <td>${username}</td>
+                    <td>${users[username].points}</td>
+                    <td>${new Date(users[username].registerTime).toLocaleDateString()}</td>
+                    <td class="action-buttons">
+                        <button class="action-btn edit-btn" data-username="${username}">编辑</button>
+                        <button class="action-btn delete-btn" data-username="${username}">删除</button>
+                    </td>
+                `;
+                
+                usersTableBody.appendChild(userRow);
+                userCount++;
+            });
+            
+            if (userCount === 0) {
+                usersTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">未找到匹配的用户</td></tr>';
+            }
+            
+            // 添加编辑和删除事件
+            const editButtons = document.querySelectorAll('.edit-btn');
+            const deleteButtons = document.querySelectorAll('.delete-btn');
+            
+            editButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const username = this.getAttribute('data-username');
+                    const users = JSON.parse(localStorage.getItem('users'));
+                    const user = users[username];
+                    
+                    document.getElementById('user-modal-title').textContent = '编辑用户';
+                    document.getElementById('edit-username').value = username;
+                    document.getElementById('edit-username').setAttribute('readonly', 'readonly');
+                    document.getElementById('edit-password').value = '';
+                    document.getElementById('edit-points').value = user.points;
+                    saveUserBtn.setAttribute('data-original-username', username);
+                    userModal.style.display = 'flex';
+                });
+            });
+            
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const username = this.getAttribute('data-username');
+                    
+                    if (confirm(`确定要删除用户 ${username} 吗？`)) {
+                        const users = JSON.parse(localStorage.getItem('users'));
+                        delete users[username];
+                        localStorage.setItem('users', JSON.stringify(users));
+                        
+                        // 触发数据更新
+                        triggerDataUpdate('users', { action: 'delete', username: username });
+                        
+                        showMessage(adminMessage, `用户 ${username} 已删除`, 'success');
+                        loadUsersTable();
+                    }
+                });
+            });
+        }
+
+        // 加载商品表格
+        function loadProductsTable(searchTerm = '') {
+            const products = JSON.parse(localStorage.getItem('products'));
+            
+            productsTableBody.innerHTML = '';
+            
+            let productCount = 0;
+            products.forEach(product => {
+                // 搜索过滤
+                if (searchTerm && !product.name.toLowerCase().includes(searchTerm.toLowerCase())) {
+                    return;
+                }
+                
+                const productRow = document.createElement('tr');
+                
+                productRow.innerHTML = `
+                    <td>${product.name}</td>
+                    <td>${product.points}</td>
+                    <td>${new Date(product.createTime).toLocaleDateString()}</td>
+                    <td class="action-buttons">
+                        <button class="action-btn edit-btn" data-product-id="${product.id}">编辑</button>
+                        <button class="action-btn delete-btn" data-product-id="${product.id}">删除</button>
+                    </td>
+                `;
+                
+                productsTableBody.appendChild(productRow);
+                productCount++;
+            });
+            
+            if (productCount === 0) {
+                productsTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">未找到匹配的商品</td></tr>';
+            }
+            
+            // 添加编辑和删除事件
+            const editButtons = document.querySelectorAll('#products-table-body .edit-btn');
+            const deleteButtons = document.querySelectorAll('#products-table-body .delete-btn');
+            
+            editButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = parseInt(this.getAttribute('data-product-id'));
+                    const products = JSON.parse(localStorage.getItem('products'));
+                    const product = products.find(p => p.id === productId);
+                    
+                    document.getElementById('product-modal-title').textContent = '编辑商品';
+                    document.getElementById('edit-product-name').value = product.name;
+                    document.getElementById('edit-product-points').value = product.points;
+                    saveProductBtn.setAttribute('data-product-id', productId);
+                    productModal.style.display = 'flex';
+                });
+            });
+            
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = parseInt(this.getAttribute('data-product-id'));
+                    const products = JSON.parse(localStorage.getItem('products'));
+                    const productIndex = products.findIndex(p => p.id === productId);
+                    
+                    if (productIndex !== -1) {
+                        const productName = products[productIndex].name;
+                        
+                        if (confirm(`确定要删除商品 ${productName} 吗？`)) {
+                            products.splice(productIndex, 1);
+                            localStorage.setItem('products', JSON.stringify(products));
+                            
+                            // 触发数据更新
+                            triggerDataUpdate('products', { action: 'delete', productName: productName });
+                            
+                            showMessage(adminMessage, `商品 ${productName} 已删除`, 'success');
+                            loadProductsTable();
+                            loadProductsGrid();
+                        }
+                    }
+                });
+            });
+        }
+
+        // 加载购物车
+        function loadCart() {
+            const currentUser = localStorage.getItem('currentUser');
+            const carts = JSON.parse(localStorage.getItem('carts'));
+            const products = JSON.parse(localStorage.getItem('products'));
+            
+            cartTableBody.innerHTML = '';
+            
+            if (!carts[currentUser] || carts[currentUser].length === 0) {
+                cartTableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">购物车为空</td></tr>';
+                return;
+            }
+            
+            // 计算每个商品的数量
+            const itemCounts = {};
+            carts[currentUser].forEach(itemId => {
+                itemCounts[itemId] = (itemCounts[itemId] || 0) + 1;
+            });
+            
+            // 显示购物车内容
+            Object.keys(itemCounts).forEach(itemId => {
+                const product = products.find(p => p.id === parseInt(itemId));
+                if (product) {
+                    const cartRow = document.createElement('tr');
+                    
+                    cartRow.innerHTML = `
+                        <td>${product.name}</td>
+                        <td>${itemCounts[itemId]}</td>
+                        <td>${product.points * itemCounts[itemId]}</td>
+                        <td class="action-buttons">
+                            <button class="action-btn delete-btn" data-product-id="${product.id}">删除</button>
+                        </td>
+                    `;
+                    
+                    cartTableBody.appendChild(cartRow);
+                }
+            });
+            
+            // 添加删除事件
+            const deleteButtons = document.querySelectorAll('#cart-table-body .delete-btn');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const productId = parseInt(this.getAttribute('data-product-id'));
+                    removeFromCart(productId);
+                });
+            });
+        }
+
+        // 加载购买记录
+        function loadPurchaseHistory() {
+            const currentUser = localStorage.getItem('currentUser');
+            const purchases = JSON.parse(localStorage.getItem('purchases'));
+            
+            purchaseHistoryTableBody.innerHTML = '';
+            
+            if (!purchases[currentUser] || purchases[currentUser].length === 0) {
+                purchaseHistoryTableBody.innerHTML = '<tr><td colspan="3" style="text-align: center;">暂无购买记录</td></tr>';
+                return;
+            }
+            
+            // 显示购买记录（按时间倒序）
+            purchases[currentUser].sort((a, b) => b.id - a.id).forEach(purchase => {
+                purchase.items.forEach(item => {
+                    const historyRow = document.createElement('tr');
+                    
+                    historyRow.innerHTML = `
+                        <td>${item.name}</td>
+                        <td>${item.points}</td>
+                        <td>${purchase.date}</td>
+                    `;
+                    
+                    purchaseHistoryTableBody.appendChild(historyRow);
+                });
+            });
+        }
+
+        // 加载统计数据
+        function loadStats() {
+            const users = JSON.parse(localStorage.getItem('users'));
+            const products = JSON.parse(localStorage.getItem('products'));
+            const purchases = JSON.parse(localStorage.getItem('purchases'));
+            
+            // 计算总用户数
+            const totalUsers = Object.keys(users).length;
+            document.getElementById('total-users').textContent = totalUsers;
+            
+            // 计算总商品数
+            const totalProducts = products.length;
+            document.getElementById('total-products').textContent = totalProducts;
+            
+            // 计算总交易数
+            let totalPurchases = 0;
+            Object.keys(purchases).forEach(username => {
+                totalPurchases += purchases[username].length;
+            });
+            document.getElementById('total-purchases').textContent = totalPurchases;
+        }
+
+        // 添加到购物车
+        function addToCart(productId) {
+            const currentUser = localStorage.getItem('currentUser');
+            const carts = JSON.parse(localStorage.getItem('carts'));
+            
+            if (!carts[currentUser]) {
+                carts[currentUser] = [];
+            }
+            
+            carts[currentUser].push(productId);
+            localStorage.setItem('carts', JSON.stringify(carts));
+            
+            // 触发数据更新
+            triggerDataUpdate('carts', { action: 'add', username: currentUser, productId: productId });
+            
+            showMessage(dashboardMessage, '商品已添加到购物车', 'success');
+        }
+
+        // 从购物车删除
+        function removeFromCart(productId) {
+            const currentUser = localStorage.getItem('currentUser');
+            const carts = JSON.parse(localStorage.getItem('carts'));
+            
+            if (!carts[currentUser] || carts[currentUser].length === 0) {
+                showMessage(dashboardMessage, '购物车为空', 'error');
+                return;
+            }
+            
+            // 找到第一个匹配的商品ID并删除
+            const index = carts[currentUser].indexOf(productId);
+            if (index !== -1) {
+                carts[currentUser].splice(index, 1);
+                localStorage.setItem('carts', JSON.stringify(carts));
+                
+                // 触发数据更新
+                triggerDataUpdate('carts', { action: 'remove', username: currentUser, productId: productId });
+                
+                showMessage(dashboardMessage, '商品已从购物车移除', 'success');
+                loadCart();
+            }
+        }
+
+        // 更新用户引用（当用户名更改时）
+        function updateUserReferences(oldUsername, newUsername) {
+            // 更新购物车
+            const carts = JSON.parse(localStorage.getItem('carts'));
+            if (carts[oldUsername]) {
+                carts[newUsername] = carts[oldUsername];
+                delete carts[oldUsername];
+                localStorage.setItem('carts', JSON.stringify(carts));
+            }
+            
+            // 更新购买记录
+            const purchases = JSON.parse(localStorage.getItem('purchases'));
+            if (purchases[oldUsername]) {
+                purchases[newUsername] = purchases[oldUsername];
+                delete purchases[oldUsername];
+                localStorage.setItem('purchases', JSON.stringify(purchases));
+            }
+        }
+
+        // 表单验证函数
+        function validateLoginForm(username, password) {
+            let isValid = true;
+            clearErrors();
+            
+            if (!username) {
+                showError('username-error', '请输入用户名');
+                isValid = false;
+            }
+            
+            if (!password) {
+                showError('password-error', '请输入密码');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        function validateRegisterForm(username, password, confirmPassword) {
+            let isValid = true;
+            clearErrors();
+            
+            if (!username) {
+                showError('reg-username-error', '请输入用户名');
+                isValid = false;
+            } else if (username.length < 3) {
+                showError('reg-username-error', '用户名至少3个字符');
+                isValid = false;
+            }
+            
+            if (!password) {
+                showError('reg-password-error', '请输入密码');
+                isValid = false;
+            } else if (password.length < 6) {
+                showError('reg-password-error', '密码至少6个字符');
+                isValid = false;
+            }
+            
+            if (!confirmPassword) {
+                showError('reg-confirm-password-error', '请确认密码');
+                isValid = false;
+            } else if (password !== confirmPassword) {
+                showError('reg-confirm-password-error', '两次输入的密码不一致');
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+
+        // 辅助函数
+        function showError(elementId, message) {
+            const errorElement = document.getElementById(elementId);
+            errorElement.textContent = message;
+            errorElement.style.display = 'block';
+        }
+
+        function showMessage(messageElement, message, type) {
+            messageElement.textContent = message;
+            messageElement.className = `message ${type}`;
+            messageElement.style.display = 'block';
+            
+            // 5秒后自动隐藏消息
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 5000);
+        }
+
+        function clearErrors() {
+            const errorElements = document.querySelectorAll('.error-message');
+            errorElements.forEach(element => {
+                element.style.display = 'none';
+            });
+        }
+
+        function clearMessages() {
+            const messageElements = document.querySelectorAll('.message');
+            messageElements.forEach(element => {
+                element.style.display = 'none';
+            });
+        }
+
+        function clearFormFields() {
+            document.getElementById('username').value = '';
+            document.getElementById('password').value = '';
+            document.getElementById('reg-username').value = '';
+            document.getElementById('reg-password').value = '';
+            document.getElementById('reg-confirm-password').value = '';
+        }
+
+        // 检查用户是否已登录
+        window.addEventListener('DOMContentLoaded', function() {
+            const currentUser = localStorage.getItem('currentUser');
+            
+            if (currentUser) {
+                const users = JSON.parse(localStorage.getItem('users'));
+                
+                // 修复：严格检查管理员权限
+                if (users[currentUser] && users[currentUser].isAdmin === true) {
+                    showAdminDashboard(currentUser);
+                } else {
+                    showDashboard(currentUser, users[currentUser].points);
+                }
+            }
+        });
+    </script>
+</body>
+</html>
